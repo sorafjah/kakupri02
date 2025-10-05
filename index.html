@@ -53,8 +53,8 @@
             /* left: 50%; */
             /* transform: translateX(-50%); */
             text-align: center;
-            font-size: 1.3rem;
-            font-weight: bold;
+            font-size: 1rem; /* フォントサイズを小さく */
+            font-weight: normal; /* 太字を解除 */
             white-space: nowrap;
             padding-top: 5px;
             flex-shrink: 0;
@@ -62,7 +62,7 @@
         .answer {
             color: red;
             display: inline-block;
-            min-width: 3.5em;
+            min-width: 4.5em; /* 括弧の幅を広げる */
             text-align: center;
             padding: 0 0.5em;
         }
@@ -201,7 +201,7 @@
             // Add Header
             const header = document.createElement('div');
             header.id = 'worksheet-header';
-            header.innerHTML = 'なまえ：＿＿＿＿＿＿＿＿＿＿＿＿';
+            header.innerHTML = 'なまえ　＿＿＿＿＿＿＿＿＿＿＿＿'; // 「：」を削除
             worksheet.appendChild(header);
 
             // Add Problem Grid
@@ -233,7 +233,7 @@
                 
                 const answerBox = document.createElement('div');
                 answerBox.className = 'user-answer-box';
-                answerBox.innerHTML = `角度： ( <span id="answer-${i}" class="answer">${'&nbsp;'.repeat(7)}</span> )`;
+                answerBox.innerHTML = `角度 ( <span id="answer-${i}" class="answer">${'&nbsp;'.repeat(10)}</span> )`; // 「：」を削除し、括弧の幅を広げる
 
                 container.appendChild(svg);
                 container.appendChild(answerBox);
@@ -282,6 +282,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
