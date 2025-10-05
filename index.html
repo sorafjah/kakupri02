@@ -41,18 +41,23 @@
             gap: 1cm;
         }
         .problem-container {
-            position: relative;
+            /* position: relative; */
+            display: flex;
+            flex-direction: column;
             width: 100%;
             height: 100%;
         }
         .user-answer-box {
-            position: absolute;
-            bottom: 0; /* 解答欄が図にかぶらないように位置を調整 */
-            left: 50%;
-            transform: translateX(-50%);
+            /* position: absolute; */
+            /* bottom: 0; */
+            /* left: 50%; */
+            /* transform: translateX(-50%); */
+            text-align: center;
             font-size: 1.3rem;
             font-weight: bold;
             white-space: nowrap;
+            padding-top: 5px;
+            flex-shrink: 0;
         }
         .answer {
             color: red;
@@ -140,12 +145,12 @@
             const width = svg.clientWidth;
             const height = svg.clientHeight;
             
-            // 頂点を下部中央に設定 (少し上に移動して解答欄とのスペースを確保)
+            // 頂点を下部中央に設定 (レイアウト変更に伴い再調整)
             const cx = width / 2;
-            const cy = height - 40;
+            const cy = height - 20;
 
             const horizontalLineLength = width * 0.4;
-            const diagonalLineLength = height * 0.8; // Y座標の変更に伴い、長さを調整
+            const diagonalLineLength = height * 0.9; // Y座標の変更に伴い、長さを調整
             const arcRadius = 30;
 
             // 水平線
@@ -277,6 +282,7 @@
     </script>
 </body>
 </html>
+
 
 
 
