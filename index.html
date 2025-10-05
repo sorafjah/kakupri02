@@ -3,196 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>角度あて問題プリント</title>
+    <title>角度練習プリント作成アプリ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 印刷用のスタイル */
-        @media print {
-            .no-print {
-                display: none;
-            }
-            @page {
-                size: A4;
-                margin: 20mm;
-            }
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                background-color: white !important;
-                padding: 0 !important;
-            }
-            #printable-area {
-               box-shadow: none !important;
-               border: none !important;
-               border-radius: 0 !important;
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        /* A4 landscape size: 297mm x 210mm */
+        @media screen {
+            #worksheet {
+                width: 29.7cm;
+                height: 21cm;
+                margin: 2rem auto;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
             }
         }
-        .printable-area {
-            width: 210mm;
-            /* min-heightを削除して、内容に応じた高さになるように変更 */
-            box-sizing: border-box;
+        #worksheet {
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1cm;
+            gap: 1cm;
+        }
+        #worksheet-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            /* padding-bottom: 0.5cm; */ /* 削除 */
+            /* border-bottom: 2px solid #ccc; */ /* 削除 */
+            /* margin-bottom: 0.5cm; */ /* 削除 */
+        }
+        #problem-grid {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 1cm;
+        }
+        .problem-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .user-answer-box {
+            position: absolute;
+            bottom: 0; /* 解答欄が図にかぶらないように位置を調整 */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.3rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .answer {
+            color: red;
+            display: inline-block;
+            min-width: 3.5em;
+            text-align: center;
+            padding: 0 0.5em;
+        }
+        /* Print styles */
+        @media print {
+            body, html {
+                margin: 0;
+                padding: 0;
+            }
+            .controls {
+                display: none;
+            }
+            #worksheet {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                margin: 0;
+                padding: 15mm; /* Adjust print margin */
+                box-shadow: none;
+                border: none;
+            }
+            .answer {
+                 /* Make answers invisible when printing unless explicitly shown */
+                color: transparent !important;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center p-8 font-sans">
-    
-    <!-- 操作パネル（印刷時には非表示） -->
-    <div class="controls no-print mb-8 p-6 bg-white rounded-lg shadow-md w-full max-w-4xl border">
-        <div class="flex flex-col md:flex-row items-center justify-center space-y-3 md:space-y-0 md:space-x-4">
-            <button id="generate-btn" class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition-colors">
-                新しい問題
+<body class="bg-gray-100">
+
+    <!-- Controls -->
+    <div class="controls container mx-auto p-4 text-center">
+        <h1 class="text-3xl font-bold mb-4">角度練習プリント作成アプリ</h1>
+        
+        <div class="mode-selection mb-4 flex justify-center items-center gap-6">
+            <span class="text-lg font-semibold">角度のタイプ:</span>
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer text-lg">
+                    <input type="radio" name="angle-mode" value="5-increments" checked class="h-5 w-5">
+                    5°ずつ
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer text-lg">
+                    <input type="radio" name="angle-mode" value="free" class="h-5 w-5">
+                    フリー
+                </label>
+            </div>
+        </div>
+
+        <div class="buttons space-x-4">
+            <button id="create-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                作成
             </button>
-            <button id="toggle-answers-btn" class="w-full md:w-auto px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-colors">
-                答えを表示
+            <button id="answer-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                答え
             </button>
-            <button onclick="window.print()" class="w-full md:w-auto px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-colors">
+            <button id="print-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
                 印刷
             </button>
         </div>
     </div>
 
-    <!-- 印刷範囲 -->
-    <div id="printable-area" class="printable-area bg-white p-8 rounded-lg shadow-xl border">
-        <header class="mb-4 text-center">
-            <p class="text-lg">以下の角度の中からふさわしいものをえらんで、（　）に書きましょう。</p>
-        </header>
-        
-        <div class="mb-4 p-2 text-center">
-            <h2 class="text-2xl font-bold text-gray-700">30°、45°、60°、90°、180°、360°</h2>
-        </div>
-
-        <div class="flex justify-end items-center mb-6 border-b-2 pb-2">
-             <p class="text-xl font-normal">なまえ（　　　　　　　　　）</p>
-        </div>
-        
-        <main id="worksheet-body" class="grid grid-cols-2 gap-x-12 gap-y-8">
-            <!-- 問題はここに動的に生成されます -->
-        </main>
+    <!-- Worksheet -->
+    <div id="worksheet">
+        <!-- Header and problems will be generated here -->
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const worksheetBody = document.getElementById('worksheet-body');
-            const generateBtn = document.getElementById('generate-btn');
-            const toggleAnswersBtn = document.getElementById('toggle-answers-btn');
+        const worksheet = document.getElementById('worksheet');
+        const createBtn = document.getElementById('create-btn');
+        const answerBtn = document.getElementById('answer-btn');
+        const printBtn = document.getElementById('print-btn');
 
-            const FIXED_ANGLES = [30, 45, 60, 90, 180, 360];
-            let problemData = []; // { angle }
-            let answersVisible = false;
+        let correctAnswers = [];
 
-            // Fisher-Yates shuffle algorithm
-            function shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            }
+        function drawAngle(svg, angle, isFromNineOClock) {
+            svg.innerHTML = ''; // Clear previous drawing
 
-            function drawAngle(canvasId, angle) {
-                try {
-                    const canvas = document.getElementById(canvasId);
-                    if (!canvas || !canvas.getContext) {
-                        console.error(`Canvas with id ${canvasId} not found.`);
-                        return;
-                    }
-                    const ctx = canvas.getContext('2d');
-                    const radius = 65; // Canvasサイズに合わせて半径を調整
-                    const centerX = canvas.width / 2;
-                    const centerY = canvas.height / 2;
-                    
-                    // 360度の場合はラジアンを調整して完全な円を描く
-                    const radians = (angle === 360 ? 359.99 : angle) * Math.PI / 180;
-
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    ctx.save();
-                    
-                    // 線の描画
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(centerX + radius, centerY);
-                    // 360度の場合は2本目の線を描画しない
-                    if (angle < 360) {
-                        ctx.moveTo(centerX, centerY);
-                        ctx.lineTo(centerX + radius * Math.cos(-radians), centerY + radius * Math.sin(-radians));
-                    }
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 2.5;
-                    ctx.stroke();
-
-                    // 円弧の描画
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius / 3, -radians, 0);
-                    ctx.strokeStyle = '#3b82f6';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    ctx.restore();
-                } catch (e) {
-                    console.error(`Error drawing angle on ${canvasId}:`, e);
-                }
-            }
-
-            function generateProblems() {
-                try {
-                    if (!worksheetBody) {
-                        console.error("Worksheet body not found.");
-                        return;
-                    }
-                    worksheetBody.innerHTML = '';
-                    problemData = [];
-                    answersVisible = false;
-                    toggleAnswersBtn.textContent = '答えを表示';
-
-                    const shuffledAngles = shuffleArray([...FIXED_ANGLES]);
-
-                    shuffledAngles.forEach((angle, index) => {
-                        const problemId = index + 1; // ID用に番号を保持
-                        problemData.push({ angle });
-
-                        const problemDiv = document.createElement('div');
-                        problemDiv.className = 'flex flex-col items-center justify-center p-2 border rounded-lg';
-                        problemDiv.innerHTML = `
-                            <canvas id="canvas-${problemId}" width="150" height="150"></canvas>
-                            <p class="mt-2 text-xl font-mono answer-box" id="answer-${problemId}">（　　　　）</p>
-                        `;
-                        worksheetBody.appendChild(problemDiv);
-
-                        // 少し遅延させて描画することで、要素の配置を確定させる
-                        setTimeout(() => {
-                           drawAngle(`canvas-${problemId}`, angle);
-                        }, 0);
-                    });
-                } catch (e) {
-                    console.error("Error generating problems:", e);
-                    worksheetBody.innerHTML = '<p class="text-red-500">問題の生成中にエラーが発生しました。ページを再読み込みしてください。</p>';
-                }
-            }
+            const width = svg.clientWidth;
+            const height = svg.clientHeight;
             
-            function toggleAnswers() {
-                answersVisible = !answersVisible;
-                toggleAnswersBtn.textContent = answersVisible ? '答えを隠す' : '答えを表示';
+            // 頂点を下部中央に設定 (少し上に移動して解答欄とのスペースを確保)
+            const cx = width / 2;
+            const cy = height - 40;
 
-                problemData.forEach((data, index) => {
-                    const problemId = index + 1;
-                    const answerBox = document.getElementById(`answer-${problemId}`);
-                    if (answerBox) {
-                       if (answersVisible) {
-                           answerBox.innerHTML = `（ <span class="text-red-500 font-bold">${data.angle}°</span> ）`;
-                       } else {
-                           answerBox.innerHTML = '（　　　　）';
-                       }
-                    }
-                });
+            const horizontalLineLength = width * 0.4;
+            const diagonalLineLength = height * 0.8; // Y座標の変更に伴い、長さを調整
+            const arcRadius = 30;
+
+            // 水平線
+            const p1x = isFromNineOClock ? cx - horizontalLineLength : cx + horizontalLineLength;
+            const p1y = cy;
+            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line1.setAttribute('x1', cx);
+            line1.setAttribute('y1', cy);
+            line1.setAttribute('x2', p1x);
+            line1.setAttribute('y2', p1y);
+            line1.setAttribute('stroke', 'black');
+            line1.setAttribute('stroke-width', '2');
+            svg.appendChild(line1);
+
+            // 斜めの線
+            const angleInRad = (isFromNineOClock ? 180 - angle : angle) * Math.PI / 180;
+            const p2x = cx + diagonalLineLength * Math.cos(angleInRad);
+            const p2y = cy - diagonalLineLength * Math.sin(angleInRad);
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line2.setAttribute('x1', cx);
+            line2.setAttribute('y1', cy);
+            line2.setAttribute('x2', p2x);
+            line2.setAttribute('y2', p2y);
+            line2.setAttribute('stroke', 'black');
+            line2.setAttribute('stroke-width', '2');
+            svg.appendChild(line2);
+
+            // 角度を示す円弧
+            const arcStartX = cx + (isFromNineOClock ? -arcRadius : arcRadius);
+            const arcStartY = cy;
+            const arcEndX = cx + arcRadius * Math.cos(angleInRad);
+            const arcEndY = cy - arcRadius * Math.sin(angleInRad);
+            const sweepFlag = isFromNineOClock ? 1 : 0; // Corrected sweep flag
+
+            const arc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            arc.setAttribute('d', `M ${arcStartX} ${arcStartY} A ${arcRadius} ${arcRadius} 0 0 ${sweepFlag} ${arcEndX} ${arcEndY}`);
+            arc.setAttribute('stroke', 'black');
+            arc.setAttribute('stroke-width', '1.5');
+            arc.setAttribute('fill', 'none');
+            svg.appendChild(arc);
+        }
+
+        function generateProblems() {
+            worksheet.innerHTML = '';
+            correctAnswers = [];
+            const angleMode = document.querySelector('input[name="angle-mode"]:checked').value;
+
+            // Add Header
+            const header = document.createElement('div');
+            header.id = 'worksheet-header';
+            header.innerHTML = 'なまえ：＿＿＿＿＿＿＿＿＿＿＿＿';
+            worksheet.appendChild(header);
+
+            // Add Problem Grid
+            const problemGrid = document.createElement('div');
+            problemGrid.id = 'problem-grid';
+            worksheet.appendChild(problemGrid);
+
+            for (let i = 0; i < 4; i++) {
+                let angle;
+                // 5度から175度の範囲で角度を生成
+                if (angleMode === '5-increments') {
+                    angle = (Math.floor(Math.random() * 35) + 1) * 5; // 5, 10, ..., 175
+                } else {
+                    angle = Math.floor(Math.random() * 171) + 5; // 5, 6, ..., 175
+                }
+                correctAnswers.push(angle);
+                
+                // 9時(左向き)か3時(右向き)かをランダムに決める
+                const isFromNineOClock = Math.random() < 0.5;
+
+                // DOM要素を作成
+                const container = document.createElement('div');
+                container.className = 'problem-container';
+                
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                svg.id = `svg-${i}`;
+                
+                const answerBox = document.createElement('div');
+                answerBox.className = 'user-answer-box';
+                answerBox.innerHTML = `角度： ( <span id="answer-${i}" class="answer">${'&nbsp;'.repeat(7)}</span> )`;
+
+                container.appendChild(svg);
+                container.appendChild(answerBox);
+                problemGrid.appendChild(container);
+                
+                // SVGのサイズが確定してから描画するために少し遅延させる
+                setTimeout(() => {
+                    drawAngle(svg, angle, isFromNineOClock);
+                }, 0);
             }
+             // Reset answer color for printing
+            document.querySelectorAll('.answer').forEach(el => el.style.color = 'red');
+        }
 
-            generateBtn.addEventListener('click', generateProblems);
-            toggleAnswersBtn.addEventListener('click', toggleAnswers);
+        function showAnswers() {
+            correctAnswers.forEach((answer, index) => {
+                const answerSpan = document.getElementById(`answer-${index}`);
+                if (answerSpan) {
+                    answerSpan.innerHTML = `${answer}°`;
+                }
+            });
+             // Ensure answers are visible for printing if shown
+            document.querySelectorAll('.answer').forEach(el => el.style.color = 'red');
+        }
+        
+        function printWorksheet() {
+            // Hide answers for printing student version unless they are shown
+            const firstAnswer = document.getElementById('answer-0');
+            if (firstAnswer && firstAnswer.textContent.trim() === '') {
+                 document.querySelectorAll('.answer').forEach(el => el.style.color = 'transparent');
+            }
+            window.print();
+            // Restore color after printing
+            document.querySelectorAll('.answer').forEach(el => el.style.color = 'red');
+        }
 
-            generateProblems();
-        });
+
+        createBtn.addEventListener('click', generateProblems);
+        answerBtn.addEventListener('click', showAnswers);
+        printBtn.addEventListener('click', printWorksheet);
+
+        // 初期問題の生成
+        window.addEventListener('load', generateProblems);
+        // ウィンドウリサイズ時にも再描画してレイアウト崩れを防ぐ
+        window.addEventListener('resize', generateProblems);
     </script>
 </body>
 </html>
+
+
 
